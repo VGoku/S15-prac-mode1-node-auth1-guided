@@ -1,13 +1,14 @@
-const path = require('path')
-const express = require('express')
+const path = require('path');
+const express = require('express');
+const authRouter = require("./auth/auth-router");
 
-const usersRouter = require('./users/users-router.js')
+const usersRouter = require('./users/users-router.js');
 
-const server = express()
+const server = express();
 
 server.use(express.static(path.join(__dirname, '../client')))
 server.use(express.json())
-
+server.use("/api/auth", authRouter)
 server.use('/api/users', usersRouter)
 
 server.get('/', (req, res) => {
