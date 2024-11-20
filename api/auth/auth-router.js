@@ -11,7 +11,7 @@ router.post("/register", async (req, res, next) => {
     const result = await User.add(newUser)
     res.status(201).json({
      message: `nice to have you, ${result.username}`,
-     //  res.json({ message: "register working" })
+     //  res.json({ message: "register working" }) use this to check your connections
     })
    } catch (err) {
     next(err)
