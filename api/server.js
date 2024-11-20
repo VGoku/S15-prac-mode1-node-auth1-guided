@@ -8,6 +8,19 @@ const server = express();
 
 server.use(express.static(path.join(__dirname, '../client')))
 server.use(express.json())
+server.use(session ({
+  name: "monkey",
+  secret: "keep it secret",
+  cookie: {
+    maxAge: 1000 * 60 * 60,
+    secure: false,
+    httpOnly: false,
+  },
+  resave: false,
+  saveUninitialized: false,
+}))
+
+
 server.use("/api/auth", authRouter)
 server.use('/api/users', usersRouter)
 
