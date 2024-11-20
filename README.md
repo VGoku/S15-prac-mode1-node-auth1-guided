@@ -16,6 +16,7 @@ Guided project for **Node Auth 1** Module.
 - [ ] type `npm run seed` to populate the db.
 - [ ] type `npm run server` to start the API.
 npm i bcryptjs
+npm i express-session
 
 Please follow along as the instructor adds authentication to the API.
 http://localhost:9000
