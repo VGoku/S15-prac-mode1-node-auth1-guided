@@ -35,7 +35,20 @@ router.post("/login", async (req, res, next) => {
    }
 })
 router.get("/logout", async (req, res, next) => {
-res.json({ message: "logout working" })
+   if (req.session.user) {
+      const { username } = req.session.user
+      req.session.destroy(err => {
+         if (err) {
+            res.json({ message: `You are stuck in hell!, ${username}` })
+         } else {
+             // the following line is optional: compliant browsers will delete the cookie from their storage
+        res.set('Set-Cookie', 'monkey=; SameSite=Strict; Path=/; Expires=Thu, 01 Jan 1970 00:00:00')//to set if logout will not send new cookie
+            res.json({ message: `You may leave, ${username}` })
+         }
+      })
+   } else {
+      res.json({ message: "I don't know you." })
+   }
 })
-
+//res.json({ message: "logout working" })
 module.exports = router;
