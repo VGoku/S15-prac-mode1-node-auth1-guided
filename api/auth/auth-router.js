@@ -18,7 +18,21 @@ router.post("/register", async (req, res, next) => {
    }
 })
 router.post("/login", async (req, res, next) => {
-res.json({ message: "login working" })
+   try {
+      const { username, password } = req.body
+      const [user] = await User.findBy({ username })
+      if (user && bcrypt.compareSync(password, user.password)) {
+         req.session.user = user
+         res.json({ message: `The great ${user.username}, is back!`})
+         // console.log("we should start a session for you")
+      } else {
+         next({ status: 401, message: "bad credentials" })
+      }
+      // console.log(user)
+      // res.json({ message: "login working" })
+   } catch (err) {
+      next(err)
+   }
 })
 router.get("/logout", async (req, res, next) => {
 res.json({ message: "logout working" })

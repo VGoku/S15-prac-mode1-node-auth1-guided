@@ -16,6 +16,7 @@ server.use(session ({
     secure: false,
     httpOnly: false,
   },
+  rolling: true,//this makes a fresh cook even if a session is going
   resave: false,
   saveUninitialized: false,
 }))
