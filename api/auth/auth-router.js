@@ -1,54 +1,90 @@
-const express = require("express");
-const bcrypt = require("bcryptjs");
-const router = express.Router();
-const User = require("../users/users-model")
+// Import necessary modules
+const express = require("express"); // Express.js web framework
+const bcrypt = require("bcryptjs"); // Password hashing library for securely storing passwords
+const router = express.Router(); // Create an instance of an Express Router for route handling
+const User = require("../users/users-model"); // User model for interacting with the database
 
+// POST route for user registration
 router.post("/register", async (req, res, next) => {
    try {
-    const { username, password } = req.body
-    const hash = bcrypt.hashSync(password, 8) // 2 ^ 8
-    const newUser = { username, password: hash }
-    const result = await User.add(newUser)
-    res.status(201).json({
-     message: `nice to have you, ${result.username}`,
-     //  res.json({ message: "register working" }) use this to check your connections
-    })
+      // Destructure username and password from the request body
+      const { username, password } = req.body;
+      
+      // Hash the password with bcrypt (8 rounds of salting and hashing)
+      const hash = bcrypt.hashSync(password, 8); // 2 ^ 8 => 256 possible hashes
+
+      // Prepare the new user object with the hashed password
+      const newUser = { username, password: hash };
+      
+      // Add the new user to the database (using the `add` method from the User model)
+      const result = await User.add(newUser);
+
+      // Send a success response with a personalized message
+      res.status(201).json({
+         message: `nice to have you, ${result.username}`,
+         //  You could log something to test connections here if needed, e.g.,
+         //  res.json({ message: "register working" }) for checking.
+      });
    } catch (err) {
-    next(err)
+      // If any error occurs, pass it to the next middleware (error handler)
+      next(err);
    }
-})
+});
+
+// POST route for user login
 router.post("/login", async (req, res, next) => {
    try {
-      const { username, password } = req.body
-      const [user] = await User.findBy({ username })
+      // Destructure username and password from the request body
+      const { username, password } = req.body;
+      
+      // Find the user by username from the database (returns an array, so destructure the first element)
+      const [user] = await User.findBy({ username });
+      
+      // Check if the user exists and if the provided password matches the hashed password in the database
       if (user && bcrypt.compareSync(password, user.password)) {
-         req.session.user = user
-         res.json({ message: `The great ${user.username}, is back!`})
-         // console.log("we should start a session for you")
+         // If valid, store the user object in the session
+         req.session.user = user;
+         
+         // Send a success response with a personalized message
+         res.json({ message: `The great ${user.username}, is back!` });
+         // You could also log something for testing, e.g., console.log("we should start a session for you")
       } else {
-         next({ status: 401, message: "bad credentials" })
+         // If the credentials are incorrect, pass an error to the next middleware
+         next({ status: 401, message: "bad credentials" });
       }
-      // console.log(user)
-      // res.json({ message: "login working" })
    } catch (err) {
-      next(err)
+      // If any error occurs, pass it to the next middleware (error handler)
+      next(err);
    }
-})
-router.get("/logout", async (req, res, next) => {
+});
+
+// GET route for logging out the user
+router.get("/logout", async (req, res, next) => { // eslint-disable-line
+   // Check if the user is logged in (if session exists)
    if (req.session.user) {
-      const { username } = req.session.user
+      const { username } = req.session.user; // Get the logged-in user's username
+      
+      // Destroy the session to log the user out
       req.session.destroy(err => {
          if (err) {
-            res.json({ message: `You are stuck in hell!, ${username}` })
+            // If there's an error while destroying the session, send an error response
+            res.json({ message: `You are stuck in hell!, ${username}` });
          } else {
-             // the following line is optional: compliant browsers will delete the cookie from their storage
-        res.set('Set-Cookie', 'monkey=; SameSite=Strict; Path=/; Expires=Thu, 01 Jan 1970 00:00:00')//to set if logout will not send new cookie
-            res.json({ message: `You may leave, ${username}` })
+            // Set the cookie expiration date to the past to remove the cookie from the browser
+            res.set('Set-Cookie', 'monkey=; SameSite=Strict; Path=/; Expires=Thu, 01 Jan 1970 00:00:00');
+            
+            // Send a success response with a personalized logout message
+            res.json({ message: `You may leave, ${username}` });
          }
-      })
+      });
    } else {
-      res.json({ message: "I don't know you." })
+      // If no user is logged in (no session), send a message saying the user is unknown
+      res.json({ message: "I don't know you." });
    }
-})
-//res.json({ message: "logout working" })
+});
+
+// Uncomment this line for testing logout working:
+// res.json({ message: "logout working" });
+
+// Export the router to use in the main server file
 module.exports = router;

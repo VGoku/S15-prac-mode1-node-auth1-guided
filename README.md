@@ -20,3 +20,5 @@ npm i express-session
 
 Please follow along as the instructor adds authentication to the API.
 http://localhost:9000
+rs inside nodemon to rest server
+npm i connect-session-knex
